@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Letters from the Future</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+@property --sun-y { syntax: '<percentage>'; inherits: true; initial-value: 112%; }
+@property --sun-a { syntax: '<number>'; inherits: true; initial-value: 0.4; }
+@property --sky-a { syntax: '<number>'; inherits: true; initial-value: 0.35; }
+
+:root {
+  --bg: #000000;
+  --text: #F2EEE8;
+  --muted: #A9A6B8;
+  --faint: #6F6D82;
+  --line: rgba(242, 238, 232, 0.14);
+  --line-strong: rgba(242, 238, 232, 0.3);
+  --field: rgba(0, 0, 0, 0.55);
+  --amber: #EDB07A;
+  --rose: #C98F8C;
+  --lilac: #A79CC4;
+  --slate: #5B6C99;
+  --navy: #1C2440;
+  --proud: #EDB07A;
+  --regret: #9FB0DA;
+  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --sans: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #000000; --text: #F2EEE8; }
+}
+:root[data-theme="dark"] { --bg: #000000; --text: #F2EEE8; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 70px); background: var(--bg); }
+body {
+  margin: 0; min-height: 100%;
+  background: var(--bg); color: var(--text);
+  font: 400 1rem/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+body.has-top::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: rgba(0, 0, 0, 0.85);
+}
+
+/* The horizon: the one memorable element. It rises and cools as you travel in time. */
+.horizon {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 70vh;
+  pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 42% at 50% var(--sun-y),
+      rgba(237, 176, 122, var(--sun-a)) 0%,
+      rgba(201, 143, 140, calc(var(--sun-a) * 0.55)) 32%,
+      rgba(167, 156, 196, calc(var(--sun-a) * 0.2)) 55%,
+      transparent 72%),
+    linear-gradient(to top,
+      rgba(91, 108, 153, var(--sky-a)) 0%,
+      rgba(28, 36, 64, calc(var(--sky-a) * 0.7)) 30%,
+      transparent 70%);
+  transition: --sun-y 1.8s cubic-bezier(.3,.6,.2,1), --sun-a 1.8s ease, --sky-a 1.8s ease;
+}
+.horizon::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 18vh; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(237,176,122,.45), rgba(167,156,196,.35), rgba(91,108,153,.3), transparent);
+}
+.horizon[data-phase="intro"]    { --sun-y: 100%; --sun-a: .62; --sky-a: .38; }
+.horizon[data-phase="frame"]    { --sun-y: 116%; --sun-a: .28; --sky-a: .3; }
+.horizon[data-phase="j1"]       { --sun-y: 98%;  --sun-a: .56; --sky-a: .3; }
+.horizon[data-phase="j5"]       { --sun-y: 84%;  --sun-a: .4;  --sky-a: .62; }
+.horizon[data-phase="work"]     { --sun-y: 104%; --sun-a: .34; --sky-a: .45; }
+.horizon[data-phase="exchange"] { --sun-y: 108%; --sun-a: .3;  --sky-a: .4; }
+.horizon[data-phase="exit"]     { --sun-y: 100%; --sun-a: .42; --sky-a: .42; }
+.horizon[data-phase="letter"]   { --sun-y: 90%;  --sun-a: .64; --sky-a: .44; }
+
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: rgba(0, 0, 0, 0.82);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.top .bar {
+  max-width: 660px; margin: 0 auto; padding: .8rem 1.25rem .6rem;
+  display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
+}
+.brand { font-family: var(--serif); font-size: 1.15rem; }
+.step { color: var(--muted); font-size: .85rem; text-align: right; }
+.track { height: 2px; background: var(--line); }
+.track span {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, var(--amber), var(--rose), var(--lilac), var(--slate));
+  transition: width .6s ease;
+}
+
+main { position: relative; z-index: 1; }
+.screen { max-width: 660px; margin: 0 auto; padding: 2rem 1.25rem 12rem; }
+
+h1, h2, h3, h4 { margin: 0; font-weight: 400; }
+h1 { font-family: var(--serif); font-size: clamp(3rem, 12vw, 5rem); line-height: .98; letter-spacing: -.015em; }
+h2 { font-family: var(--serif); font-size: clamp(2rem, 7vw, 2.6rem); line-height: 1.08; letter-spacing: -.01em; margin-bottom: .75rem; }
+h2.jump { font-size: clamp(2.1rem, 8vw, 3rem); }
+h3 { font-family: var(--serif); font-size: 1.6rem; line-height: 1.15; margin: 2.75rem 0 .5rem; }
+h4 { font-family: var(--sans); font-weight: 600; font-size: 1rem; }
+h1:focus, h2:focus { outline: none; }
+p { margin: 0 0 1rem; }
+.lede { color: var(--muted); font-size: 1.08rem; max-width: 60ch; }
+.sub { color: var(--muted); font-size: .9rem; margin-bottom: .4rem; }
+.small { color: var(--faint); font-size: .88rem; }
+.hint { color: var(--muted); font-size: .92rem; margin: .1rem 0 .55rem; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Intro */
+.hero { min-height: 82svh; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 6vh; }
+.hero h1 { margin-bottom: 1.25rem; }
+.hero .lede { font-size: 1.15rem; color: #D9D4D9; }
+.how { list-style: none; counter-reset: how; padding: 0; margin: 1.5rem 0 2rem; display: grid; gap: .7rem; }
+.how li { counter-increment: how; display: grid; grid-template-columns: 2rem 1fr; color: var(--muted); }
+.how li::before { content: counter(how); font-family: var(--serif); font-size: 1.35rem; color: var(--amber); line-height: 1.1; }
+.how strong { color: var(--text); font-weight: 600; }
+
+/* Questions */
+.q { margin: 1.9rem 0 0; }
+.q > label, .label { display: block; font-weight: 600; font-size: 1.05rem; line-height: 1.35; margin-bottom: .2rem; }
+.q.proud > label::before, .q.regret > label::before {
+  content: ""; display: inline-block; width: .55em; height: .55em; border-radius: 50%;
+  margin-right: .55em; vertical-align: .08em;
+}
+.q.proud > label::before { background: var(--proud); }
+.q.regret > label::before { background: var(--regret); }
+textarea, input[type="text"], input[type="date"] {
+  width: 100%; font: 400 1rem/1.5 var(--sans); color: var(--text);
+  background: var(--field); border: 1px solid var(--line); border-radius: 8px;
+  padding: .75rem .9rem; transition: border-color .2s;
+}
+textarea { resize: vertical; min-height: 5.2rem; }
+.q.proud textarea { border-left: 3px solid var(--proud); }
+.q.regret textarea { border-left: 3px solid var(--regret); }
+textarea:focus, input:focus { outline: none; border-color: var(--amber); }
+textarea::placeholder, input::placeholder { color: var(--faint); }
+input[type="date"] { max-width: 15rem; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+textarea:focus-visible, input[type="text"]:focus-visible, input[type="date"]:focus-visible { outline: none; }
+
+blockquote.decision {
+  margin: 0 0 .5rem; padding: .2rem 0 .2rem 1rem; border-left: 2px solid var(--line-strong);
+  font-family: var(--serif); font-style: italic; font-size: 1.3rem; line-height: 1.3; color: #DCD6DA;
+}
+
+.opts { display: grid; gap: .55rem; margin-bottom: .7rem; }
+.opt-row { display: grid; grid-template-columns: 1.6rem 1fr auto; gap: .6rem; align-items: center; }
+.opt-letter { font-family: var(--serif); font-size: 1.4rem; color: var(--amber); text-align: center; }
+.icon {
+  width: 2.4rem; height: 2.4rem; border-radius: 50%; border: 1px solid var(--line);
+  background: transparent; color: var(--text); font: 500 1.2rem/1 var(--sans); cursor: pointer;
+}
+.icon:disabled { opacity: .3; cursor: default; }
+details.prompts { margin-top: .9rem; color: var(--muted); }
+details.prompts summary { cursor: pointer; color: var(--text); font-size: .95rem; }
+details.prompts ul { margin: .6rem 0 0; padding-left: 1.2rem; }
+details.prompts li { margin: .25rem 0; }
+
+.range { display: grid; grid-template-columns: 1fr 2.2rem; gap: 1rem; align-items: center; margin-top: .5rem; }
+input[type="range"] { width: 100%; accent-color: var(--amber); }
+output { font-family: var(--serif); font-size: 1.6rem; text-align: center; }
+.ends { display: flex; justify-content: space-between; color: var(--faint); font-size: .85rem; padding-right: 3.2rem; }
+.note { color: var(--muted); font-size: .95rem; margin-top: 1.2rem; padding: .7rem .9rem; border: 1px solid var(--line); border-radius: 8px; }
+.inline { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-top: .4rem; }
+.check { display: inline-flex; gap: .5rem; align-items: center; color: var(--muted); cursor: pointer; }
+.check input { accent-color: var(--amber); width: 1.1rem; height: 1.1rem; }
+
+/* Choices */
+fieldset { border: 0; padding: 0; margin: 1rem 0 0; }
+.choices { display: grid; gap: .6rem; }
+.choice {
+  display: flex; gap: .8rem; align-items: center; padding: 1rem 1.1rem; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--field);
+}
+.choice:has(input:checked) { border-color: var(--amber); }
+.choice input { accent-color: var(--amber); width: 1.15rem; height: 1.15rem; flex: none; }
+
+.cases { margin-top: 2.25rem; display: grid; gap: .6rem; }
+.case {
+  text-align: left; padding: 1rem 1.1rem; border-radius: 12px; cursor: pointer;
+  background: var(--field); border: 1px solid var(--line); color: var(--text); font: inherit;
+  display: grid; gap: .15rem;
+}
+.case.on { border-color: var(--amber); }
+.case-title { font-weight: 600; }
+.case-text { color: var(--muted); font-size: .93rem; }
+
+/* Buttons */
+.btn {
+  font: 600 1rem/1 var(--sans); padding: 1rem 1.4rem; border-radius: 999px; cursor: pointer;
+  background: var(--text); color: #000000; border: 1px solid var(--text);
+}
+.btn.ghost { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn.small { padding: .7rem 1rem; font-size: .92rem; }
+.nav { display: flex; gap: .7rem; flex-wrap: wrap; margin-top: 2.75rem; }
+.nav .btn:last-child { margin-left: auto; }
+.nav.start .btn:last-child { margin-left: 0; }
+.err { color: #F3C6A4; border-left: 2px solid var(--amber); padding-left: .8rem; margin-top: 2rem; }
+
+/* Event card */
+.card {
+  margin: 1.75rem 0 .5rem; padding: 1.5rem 1.4rem; min-height: 11rem; border-radius: 14px;
+  display: flex; flex-direction: column; justify-content: center; gap: .6rem;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(160deg, rgba(20, 18, 28, .96), rgba(0, 0, 0, .96)) padding-box,
+    linear-gradient(135deg, var(--amber), var(--rose) 40%, var(--slate)) border-box;
+}
+.card.back { background: var(--field); border: 1px dashed var(--line-strong); align-items: flex-start; }
+.card.back p { color: var(--muted); }
+.card-kind { color: var(--amber); font-size: .9rem; margin: 0; }
+.card-text { font-family: var(--serif); font-size: 1.75rem; line-height: 1.2; margin: 0; }
+.card.flip { animation: flip .8s cubic-bezier(.2,.7,.2,1); }
+@keyframes flip { from { transform: perspective(900px) rotateY(75deg); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Board */
+.board { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .8rem; margin-top: 1.5rem; }
+.col { border: 1px solid var(--line); border-radius: 12px; padding: 1rem; background: var(--field); }
+.col h4 { margin-bottom: .7rem; }
+.col .headline { font-family: var(--serif); font-style: italic; font-size: 1.15rem; line-height: 1.25; margin: .2rem 0 .7rem; }
+.nt { border-left: 2px solid var(--line); padding-left: .6rem; margin: 0 0 .6rem; font-size: .93rem; }
+.nt.proud { border-color: var(--proud); }
+.nt.regret { border-color: var(--regret); }
+.src { display: block; color: var(--faint); font-size: .8rem; }
+.hybrid { margin-top: 1.25rem; padding: 1.2rem; border: 1px solid var(--line-strong); border-radius: 14px; }
+.hybrid p { color: var(--muted); }
+
+/* Exchange */
+.ex { margin-top: 2rem; }
+.ex h3 { margin-top: 0; font-size: 1.45rem; }
+.pt {
+  display: grid; grid-template-columns: 1fr auto; gap: .8rem; align-items: center;
+  padding: .75rem 0 .75rem .8rem; border-left: 2px solid var(--line); margin: .5rem 0;
+}
+.pt.proud { border-color: var(--proud); }
+.pt.regret { border-color: var(--regret); }
+.stepper { display: flex; gap: .4rem; align-items: center; }
+.stepper output { font-size: 1.3rem; width: 1.6rem; }
+.pointsbar {
+  position: sticky; bottom: 0; z-index: 2; margin-top: 2rem;
+  padding: .9rem 1.1rem calc(.9rem + env(safe-area-inset-bottom, 0px));
+  background: rgba(0, 0, 0, .88); border-top: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.pointsbar strong { font-family: var(--serif); font-weight: 400; font-size: 1.6rem; color: var(--amber); }
+
+/* Result */
+.rank { list-style: none; padding: 0; margin: 1.25rem 0 .5rem; display: grid; gap: .9rem; }
+.rank li { display: grid; grid-template-columns: 1fr 2.5rem; gap: .3rem .8rem; align-items: center; }
+.rank-name { grid-column: 1 / -1; font-weight: 600; }
+.bar { height: 8px; background: rgba(242, 238, 232, .08); border-radius: 4px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--amber), var(--rose), var(--slate)); border-radius: 4px; }
+.rank-score { font-family: var(--serif); font-size: 1.5rem; text-align: right; }
+.trail { list-style: none; padding: 0; margin: .5rem 0 0; }
+.trail li { border-left: 2px solid var(--line); padding-left: .7rem; margin: .6rem 0; }
+.trail li.proud { border-color: var(--proud); }
+.trail li.regret { border-color: var(--regret); }
+.exits { display: grid; gap: .6rem; }
+.exit {
+  display: grid; grid-template-columns: auto 1fr auto; gap: .15rem .8rem; align-items: center;
+  padding: 1rem 1.1rem; border: 1px solid var(--line); border-radius: 12px; background: var(--field); cursor: pointer;
+}
+.exit:has(input:checked) { border-color: var(--amber); }
+.exit input { grid-row: span 2; accent-color: var(--amber); width: 1.15rem; height: 1.15rem; }
+.exit-title { font-weight: 600; }
+.exit-text { grid-column: 2; color: var(--muted); font-size: .93rem; }
+.tag { grid-row: 1; grid-column: 3; color: var(--amber); font-size: .82rem; }
+
+/* Letter */
+.reveal { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.25rem 0 1.25rem; }
+.reveal > div { border: 1px solid var(--line); border-radius: 12px; padding: 1rem; background: var(--field); }
+.big { font-family: var(--serif); font-size: 1.5rem; line-height: 1.15; margin: 0; }
+textarea.letter {
+  font: 400 1.25rem/1.55 var(--serif); padding: 1.2rem 1.3rem; min-height: 22rem;
+  border-color: var(--line-strong);
+}
+.letter-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.linkbtn { background: none; border: 0; color: var(--amber); font: 500 .92rem var(--sans); cursor: pointer; padding: .3rem 0; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Summary */
+.final {
+  margin: 1.5rem 0 2.5rem; padding: 1.8rem 1.5rem; border-radius: 16px; white-space: pre-wrap;
+  font: 400 1.3rem/1.6 var(--serif);
+  border: 1px solid transparent;
+  background:
+    linear-gradient(170deg, rgba(24, 20, 30, .96), rgba(0, 0, 0, .96)) padding-box,
+    linear-gradient(135deg, var(--amber), var(--rose) 40%, var(--slate)) border-box;
+}
+.final .date { display: block; font-family: var(--sans); font-size: .88rem; color: var(--muted); margin-bottom: 1rem; }
+dl.brief { display: grid; grid-template-columns: 1fr; gap: 0; margin: 0; }
+dl.brief dt { color: var(--muted); font-size: .88rem; margin-top: 1.2rem; }
+dl.brief dd { margin: .15rem 0 0; white-space: pre-wrap; }
+dl.brief ul { margin: .2rem 0 0; padding-left: 1.1rem; }
+
+@media (min-width: 640px) {
+  .screen { padding-top: 3rem; }
+  dl.brief { grid-template-columns: 11rem 1fr; column-gap: 1.5rem; }
+  dl.brief dt { margin-top: 1.1rem; }
+  dl.brief dd { margin-top: 1.1rem; }
+}
+@media (max-width: 420px) {
+  .reveal { grid-template-columns: 1fr; }
+  .step { font-size: .78rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .horizon, .track span { transition: none; }
+  .card.flip { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="horizon" id="horizon" aria-hidden="true"></div>
+<header class="top" id="top" hidden></header>
+<main id="app"></main>
+
+<script>
+const KEY = 'letters-from-the-future-v1';
+
+const DECKS = {
+  personal: [
+    { k: 'Opportunity', t: 'Someone you admire offers to work with you.' },
+    { k: 'Opportunity', t: 'Unexpected money gives you a year of breathing room.' },
+    { k: 'Opportunity', t: 'A side project suddenly finds a large audience.' },
+    { k: 'Setback', t: 'Everything takes twice as long as you planned.' },
+    { k: 'Setback', t: 'Someone else launches your idea first, and faster.' },
+    { k: 'Setback', t: 'You have to pause for three months.' },
+    { k: 'Setback', t: 'A person close to you moves far away.' },
+    { k: 'Shift', t: 'AI changes your field from the ground up.' },
+    { k: 'Shift', t: 'A rule or law in your area changes overnight.' },
+    { k: 'Shift', t: 'You discover a new interest that questions your plans.' }
+  ],
+  ravel: [
+    { k: 'Setback', t: 'A competitor from Asia halves premium e-bike prices.' },
+    { k: 'Opportunity', t: 'The EU launches funding for repair and sharing models.' },
+    { k: 'Setback', t: 'Your head of product development resigns.' },
+    { k: 'Opportunity', t: 'A video about your workshop goes viral: two million views.' },
+    { k: 'Setback', t: 'A battery shortage delays deliveries by six months.' },
+    { k: 'Shift', t: 'Lyon closes its city centre to cars.' },
+    { k: 'Setback', t: 'Your largest fleet customer goes bankrupt.' },
+    { k: 'Shift', t: 'A family shareholder wants to sell their stake.' }
+  ]
+};
+
+const CASES = {
+  grad: {
+    title: 'After the master’s',
+    blurb: 'A trainee job, a startup, or a year abroad.',
+    decision: 'I graduate soon. I have two offers and an idea of my own. What should I do next?',
+    options: ['Corporate trainee programme', 'Co-found a startup with a friend', 'A year abroad, then decide again'],
+    deck: 'personal'
+  },
+  ravel: {
+    title: 'Maison Ravel',
+    blurb: 'A bicycle maker in Lyon can fund only one strategy. You sit on the board.',
+    decision: 'Maison Ravel, a bicycle maker in Lyon with 120 people and flat sales, can fund only one direction. Which one should the board choose?',
+    options: ['Premium e-bike for export', 'Bikes as a service for cities and fleets', 'Sell a majority stake to a mobility group'],
+    deck: 'ravel'
+  }
+};
+
+const EXITS = [
+  { id: 'decide', title: 'I decide', text: 'Commit to one option now.' },
+  { id: 'test', title: 'I test', text: 'Try a small piece of the future before committing.' },
+  { id: 'explore', title: 'I explore', text: 'Find the one fact that could change the picture.' }
+];
+
+const STATIONS = ['Start', 'Frame', 'One year', 'Five years', 'Workshop', 'Exchange', 'Way forward', 'Letter'];
+const STATION = { start: 0, frame: 1, gut: 1, j1: 2, gate5: 3, j5: 3, work: 4, exchange: 5, exit: 6, letter: 7, summary: 7 };
+const PHASE = { intro: 'intro', start: 'frame', frame: 'frame', gut: 'frame', j1: 'j1', gate5: 'j1', j5: 'j5', work: 'work', exchange: 'exchange', exit: 'exit', letter: 'letter', summary: 'letter' };
+
+const NOW = new Date();
+const plusYears = n => new Date(NOW.getFullYear() + n, NOW.getMonth(), NOW.getDate());
+const Y1 = plusYears(1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+const Y5 = plusYears(5).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+const Y1_FULL = plusYears(1).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const uid = () => Math.random().toString(36).slice(2, 9);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const filled = s => typeof s === 'string' && s.trim().length > 0;
+const letterOf = i => String.fromCharCode(65 + i);
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+function fresh() {
+  return {
+    screen: 'intro', idx: 0, hist: [], caseId: null, deckId: 'personal', deck: [],
+    decision: '', options: [{ id: uid(), name: '' }, { id: uid(), name: '' }],
+    north: '', stakes: 3, irrev: 3, deadline: '', noDeadline: false, gut: null,
+    j1: {}, j5: {}, did5: null, draft: {}, points: {}, regretPick: null,
+    exit: null, ex: {}, letter: '', letterFor: '', plan: {}, reflect: {}, err: ''
+  };
+}
+function load() { try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable */ } }
+
+let state = load() || fresh();
+let resume = null;
+if (state.screen !== 'intro') { resume = { screen: state.screen, idx: state.idx }; state.screen = 'intro'; }
+let confirmReset = false;
+let justDrawn = null;
+
+const get = path => path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), state);
+function set(path, v) {
+  const ks = path.split('.'); let o = state;
+  for (let i = 0; i < ks.length - 1; i++) { if (o[ks[i]] == null) o[ks[i]] = {}; o = o[ks[i]]; }
+  o[ks[ks.length - 1]] = v;
+}
+
+const isWe = () => state.caseId === 'ravel';
+const opts = () => state.options.filter(o => !o.hybrid);
+const allOpts = () => state.options;
+const hyb = () => state.options.find(o => o.hybrid);
+const byId = id => state.options.find(o => o.id === id);
+const nameOf = id => (byId(id) || {}).name || '';
+const sum = () => Number(state.stakes) + Number(state.irrev);
+const gateText = () => sum() > 7
+  ? `Stakes plus irreversibility: ${sum()} of 10. The five-year jump is part of your journey.`
+  : `Stakes plus irreversibility: ${sum()} of 10. The five-year jump is optional.`;
+
+/* Notes and points */
+function notes() {
+  const out = [];
+  for (const o of allOpts()) for (const j of ['j1', 'j5']) {
+    const d = state[j][o.id]; if (!d) continue;
+    for (const type of ['proud', 'regret']) if (filled(d[type])) out.push({ key: `${o.id}|${j}|${type}`, opt: o.id, j, type, text: d[type] });
+  }
+  return out;
+}
+const reasonsFor = id => notes().filter(n => (n.type === 'proud' && n.opt === id) || (n.type === 'regret' && n.opt !== id));
+const pkey = (target, n) => `${target}>${n.key}`;
+const ptsOf = (target, n) => state.points[pkey(target, n)] || 0;
+function spent() {
+  let s = 0;
+  for (const o of allOpts()) for (const n of reasonsFor(o.id)) s += ptsOf(o.id, n);
+  return s;
+}
+const score = id => reasonsFor(id).reduce((s, n) => s + ptsOf(id, n), 0) + (state.regretPick === id ? 3 : 0);
+const ranked = () => allOpts().map(o => ({ o, score: score(o.id) })).sort((a, b) => b.score - a.score);
+const srcLabel = n => {
+  const when = n.j === 'j1' ? 'one year' : 'five years';
+  return n.type === 'proud' ? `Proud after ${when}` : `Regret in “${nameOf(n.opt)}” after ${when}`;
+};
+
+/* Building blocks */
+const idOf = b => 'f-' + b.replace(/[^a-z0-9]/gi, '-');
+function field({ bind, label, hint, rows = 3, kind = '' }) {
+  const id = idOf(bind);
+  return `<div class="q ${kind}"><label for="${id}">${label}</label>${hint ? `<p class="hint" id="h-${id}">${hint}</p>` : ''}<textarea id="${id}" data-bind="${bind}" rows="${rows}"${hint ? ` aria-describedby="h-${id}"` : ''}>${esc(get(bind))}</textarea></div>`;
+}
+function dateField(bind, label) {
+  const id = idOf(bind);
+  return `<div class="q"><label for="${id}">${label}</label><input type="date" id="${id}" data-bind="${bind}" value="${esc(get(bind) || '')}"></div>`;
+}
+function nav(action, label, back = true) {
+  return `${state.err ? `<p class="err" role="alert">${esc(state.err)}</p>` : ''}<div class="nav">${back ? '<button class="btn ghost" data-action="back">Back</button>' : ''}<button class="btn" data-action="${action}">${label}</button></div>`;
+}
+function cardBlock(id) {
+  const card = (state.j1[id] || {}).card;
+  if (!card) return `<div class="card back"><p>Something happened this year that nobody planned for.</p><button class="btn" data-action="draw" data-opt="${id}">Draw the event card</button></div>`;
+  return `<div class="card ${justDrawn === id ? 'flip' : ''}" role="note" aria-label="Event card"><p class="card-kind">${esc(card.k)}</p><p class="card-text">${esc(card.t)}</p></div>`;
+}
+
+/* Screens */
+const S = {};
+
+S.intro = () => `
+<section class="hero">
+  <h1>Letters from the Future</h1>
+  <p class="lede">Bring a real decision. Live one year, then five years inside each option, let chance interfere, and back the future you want with evidence from the futures you lived.</p>
+  <ol class="how">
+    <li><span><strong>Frame</strong> your decision, your options and where you want to be in five years.</span></li>
+    <li><span><strong>Travel</strong> into every option. An event card changes each future.</span></li>
+    <li><span><strong>Decide</strong> with future points, then read a letter from your future self.</span></li>
+  </ol>
+  <div class="nav start">${resume
+    ? `<button class="btn" data-action="resume">Continue where you left off</button><button class="btn ghost" data-action="reset">${confirmReset ? 'Tap again to erase your answers' : 'Start a new decision'}</button>`
+    : '<button class="btn" data-action="begin">Start the journey</button>'}</div>
+  <p class="small" style="margin-top:1.25rem">About 25 minutes. Your answers stay in this browser.</p>
+</section>`;
+
+S.start = () => `
+<h2>What decision is in front of you?</h2>
+<p class="lede">Bring something real and still open, with at least two ways to go.</p>
+${field({ bind: 'decision', label: 'Describe it in a sentence or two', hint: 'Example: Should I take the trainee offer or join my friend’s startup?' })}
+<div class="cases"><p class="label">Or practise with a prepared case</p>
+${Object.entries(CASES).map(([k, c]) => `<button class="case ${state.caseId === k ? 'on' : ''}" data-action="case" data-case="${k}" aria-pressed="${state.caseId === k}"><span class="case-title">${c.title}</span><span class="case-text">${c.blurb}</span></button>`).join('')}
+</div>
+${nav('next-start', 'Frame the decision')}`;
+
+S.frame = () => {
+  const n = state.options.length, we = isWe();
+  return `
+<h2>Frame the decision</h2>
+<blockquote class="decision">${esc(state.decision)}</blockquote>
+<div class="q"><span class="label">What are your options?</span><p class="hint">Two to four. Name each in a few words.</p>
+  <div class="opts">${state.options.map((o, i) => `<div class="opt-row"><span class="opt-letter" aria-hidden="true">${letterOf(i)}</span><input type="text" data-bind="options.${i}.name" value="${esc(o.name)}" aria-label="Option ${letterOf(i)}" placeholder="Option ${letterOf(i)}">${n > 2 ? `<button class="icon" data-action="rmopt" data-i="${i}" aria-label="Remove option ${letterOf(i)}">×</button>` : '<span></span>'}</div>`).join('')}</div>
+  ${n < 4 ? '<button class="btn ghost small" data-action="addopt">Add an option</button>' : ''}
+  <details class="prompts"><summary>Need another option? Five questions that help</summary><ul>
+    <li>What would the boldest option be?</li>
+    <li>What would you do if failure were impossible?</li>
+    <li>What happens if you do nothing at all?</li>
+    <li>Is there a smaller, trial version of one option?</li>
+    <li>Could two options be combined?</li></ul></details>
+</div>
+${field({ bind: 'north', label: we ? 'Five years from now, where should Maison Ravel be, whatever the board decides today?' : 'Five years from now, where do you want to be, whatever you decide today?', hint: 'This is your north star. Describe a day, a role, a feeling, not just a title.' })}
+<div class="q"><label for="stakes">How much is at stake?</label>
+  <div class="range"><input id="stakes" type="range" min="1" max="5" data-bind="stakes" data-live value="${state.stakes}"><output data-out="stakes">${state.stakes}</output></div>
+  <div class="ends"><span>Minor</span><span>Life-shaping</span></div></div>
+<div class="q"><label for="irrev">How hard would it be to undo?</label>
+  <div class="range"><input id="irrev" type="range" min="1" max="5" data-bind="irrev" data-live value="${state.irrev}"><output data-out="irrev">${state.irrev}</output></div>
+  <div class="ends"><span>Easy to reverse</span><span>Hard to undo</span></div></div>
+<p class="note" data-out="gate">${gateText()}</p>
+<div class="q"><label for="f-deadline">When do you need to decide?</label>
+  <div class="inline"><input type="date" id="f-deadline" data-bind="deadline" value="${esc(state.deadline)}">
+  <label class="check"><input type="checkbox" data-bind="noDeadline" ${state.noDeadline ? 'checked' : ''}> No fixed deadline</label></div></div>
+${nav('next-frame', 'Seal your gut pick')}`;
+};
+
+S.gut = () => `
+<h2>Before you travel</h2>
+<p class="lede">Which option would you pick right now, without thinking any further? Your answer is sealed until the end of the game.</p>
+<fieldset class="choices"><legend class="sr">Your gut pick</legend>
+${opts().map(o => `<label class="choice"><input type="radio" name="gut" value="${o.id}" data-bind="gut" ${state.gut === o.id ? 'checked' : ''}><span>${esc(o.name)}</span></label>`).join('')}
+</fieldset>
+${nav('next-gut', 'Seal it and travel one year')}`;
+
+S.j1 = () => {
+  const list = opts(), o = list[state.idx], d = state.j1[o.id] || {}, we = isWe(), p = `j1.${o.id}`;
+  const last = state.idx === list.length - 1;
+  return `
+<p class="sub">Option ${letterOf(state.idx)}, ${state.idx + 1} of ${list.length}</p>
+<h2 class="jump">${Y1}. ${we ? 'The board chose' : 'You chose'} “${esc(o.name)}”.</h2>
+<p class="lede">A year has passed. Answer in the present tense, as if it were already true.</p>
+${cardBlock(o.id)}
+${d.card ? `
+${field({ bind: `${p}.day`, label: we ? 'What does a normal week at Maison Ravel look like now?' : 'What does a normal day look like now?', hint: we ? 'Who are your customers, what leaves the workshop, who joined or left the team?' : 'Where are you, who are you with, what fills your time, what have you learned?' })}
+${field({ bind: `${p}.event`, label: 'How did this event change your path, and what did you do about it?', hint: 'Make it concrete: one decision you took because of it.' })}
+${field({ bind: `${p}.proud`, label: 'What are you proud of?', hint: 'Something that feels worth it, looking back.', kind: 'proud' })}
+${field({ bind: `${p}.regret`, label: 'What do you regret or miss?', hint: 'A door that closed, a tension that stayed, a cost you underestimated.', kind: 'regret' })}` : ''}
+${nav('next-j1', last ? 'Leave the one-year futures' : `Travel into option ${letterOf(state.idx + 1)}`)}`;
+};
+
+S.gate5 = () => {
+  const req = sum() > 7;
+  return `
+<h2>The one-year futures are written</h2>
+<p class="lede">${req
+    ? `Stakes plus irreversibility come to ${sum()} of 10. A decision this heavy deserves the long view, so next you travel five years ahead.`
+    : `Stakes plus irreversibility come to ${sum()} of 10, so the five-year jump is optional. It often turns first impressions around.`}</p>
+${state.err ? `<p class="err" role="alert">${esc(state.err)}</p>` : ''}
+<div class="nav"><button class="btn ghost" data-action="back">Back</button>${req ? '' : '<button class="btn ghost" data-action="skip5">Skip to the workshop</button>'}<button class="btn" data-action="go5">Travel five years</button></div>`;
+};
+
+S.j5 = () => {
+  const list = opts(), o = list[state.idx], we = isWe(), p = `j5.${o.id}`;
+  if (!state.j5[o.id]) state.j5[o.id] = {};
+  if (state.j5[o.id].north == null) state.j5[o.id].north = 3;
+  const last = state.idx === list.length - 1;
+  return `
+<p class="sub">Option ${letterOf(state.idx)}, ${state.idx + 1} of ${list.length}</p>
+<h2 class="jump">${Y5}. Five years ago ${we ? 'the board' : 'you'} chose “${esc(o.name)}”.</h2>
+<p class="lede">Stay in the present tense and think bigger than one year: what has grown, what has disappeared?</p>
+${field({ bind: `${p}.headline`, label: we ? 'Write the headline about Maison Ravel.' : 'Write the headline about you.', hint: we ? 'Example: “Lyon’s oldest bike maker now runs the city’s fleets”' : 'Example: “Former trainee now leads the company’s Asia expansion”', rows: 2 })}
+${field({ bind: `${p}.opened`, label: 'Which door has opened that seems unthinkable today?' })}
+${field({ bind: `${p}.closed`, label: 'Which door is closed for good?' })}
+<div class="q"><label for="n-${o.id}">How close are you to your north star?</label><p class="hint">“${esc(state.north)}”</p>
+  <div class="range"><input id="n-${o.id}" type="range" min="1" max="5" data-bind="${p}.north" data-live value="${state.j5[o.id].north}"><output data-out="${p}.north">${state.j5[o.id].north}</output></div>
+  <div class="ends"><span>Far away</span><span>Living it</span></div></div>
+${field({ bind: `${p}.proud`, label: 'What are you proud of, five years on?', kind: 'proud' })}
+${field({ bind: `${p}.regret`, label: 'What do you regret, five years on?', kind: 'regret' })}
+${nav('next-j5', last ? 'Open the future board' : `Travel into option ${letterOf(state.idx + 1)}`)}`;
+};
+
+function boardCol(o, i) {
+  const a = state.j1[o.id] || {}, b = state.j5[o.id] || {};
+  const nt = (type, when, text) => filled(text) ? `<p class="nt ${type}"><span class="src">${type === 'proud' ? 'Proud' : 'Regret'}, ${when}</span>${esc(text)}</p>` : '';
+  return `<article class="col"><h4>${letterOf(i)}. ${esc(o.name)}</h4>
+    ${a.card ? `<p class="nt"><span class="src">Event card</span>${esc(a.card.t)}</p>` : ''}
+    ${nt('proud', 'one year', a.proud)}${nt('regret', 'one year', a.regret)}
+    ${filled(b.headline) ? `<p class="headline">“${esc(b.headline)}”</p>` : ''}
+    ${nt('proud', 'five years', b.proud)}${nt('regret', 'five years', b.regret)}
+    ${b.north ? `<p class="nt"><span class="src">North star</span>${b.north} of 5</p>` : ''}</article>`;
+}
+
+S.work = () => {
+  const h = hyb(), hd = h ? (state.j1[h.id] || {}) : {};
+  return `
+<h2>The future board</h2>
+<p class="lede">Every future you lived, side by side. Look for pieces worth keeping.</p>
+<div class="board">${opts().map(boardCol).join('')}</div>
+<h3>Can you build a better option from pieces of these futures?</h3>
+<p class="hint">Optional. Example: “Bikes as a service, with the mobility group as a fleet partner.”</p>
+${h ? `<div class="hybrid"><p class="sub">New option ${letterOf(opts().length)}</p><h4>${esc(h.name)}</h4>${filled(h.desc) ? `<p>${esc(h.desc)}</p>` : ''}
+  ${cardBlock(h.id)}
+  ${hd.card ? `${field({ bind: `j1.${h.id}.proud`, label: `${Y1}: what are you proud of?`, kind: 'proud' })}${field({ bind: `j1.${h.id}.regret`, label: `${Y1}: what do you regret or miss?`, kind: 'regret' })}` : ''}
+  <button class="linkbtn" data-action="rmhybrid">Remove the new option</button></div>`
+  : `<div class="q"><label for="f-draft-name">Name of the new option</label><input type="text" id="f-draft-name" data-bind="draft.name" value="${esc(state.draft.name || '')}"></div>
+  ${field({ bind: 'draft.desc', label: 'Describe it in one sentence', rows: 2 })}
+  <div style="margin-top:1rem"><button class="btn ghost small" data-action="mkhybrid">Create it and travel one year</button></div>`}
+${nav('next-work', 'Go to the exchange')}`;
+};
+
+S.exchange = () => {
+  const left = 10 - spent();
+  const row = (target, n) => {
+    const v = ptsOf(target, n), k = pkey(target, n);
+    return `<div class="pt ${n.type}"><div><span class="src">${esc(srcLabel(n))}</span>${esc(n.text)}</div>
+      <div class="stepper"><button class="icon" data-action="pt" data-key="${k}" data-d="-1" aria-label="Remove a point" ${v ? '' : 'disabled'}>−</button><output aria-label="Points">${v}</output><button class="icon" data-action="pt" data-key="${k}" data-d="1" aria-label="Add a point" ${left ? '' : 'disabled'}>+</button></div></div>`;
+  };
+  return `
+<h2>Spend your future points</h2>
+<p class="lede">You have 10 points. Each point backs one note: support an option with what made you proud in its future, or with what you would regret in another one.</p>
+${allOpts().map(o => {
+    const rs = reasonsFor(o.id);
+    return `<section class="ex"><h3>For “${esc(o.name)}”</h3>${rs.length ? rs.map(n => row(o.id, n)).join('') : '<p class="hint">No notes yet.</p>'}</section>`;
+  }).join('')}
+<section class="ex"><h3>Your regret card, worth 3 points</h3>
+<p class="hint">One year from now, which option would you most regret not having chosen?</p>
+<fieldset class="choices"><legend class="sr">Regret card</legend>
+${allOpts().map(o => `<label class="choice"><input type="radio" name="regret" value="${o.id}" data-bind="regretPick" ${state.regretPick === o.id ? 'checked' : ''}><span>${esc(o.name)}</span></label>`).join('')}
+</fieldset></section>
+<div class="pointsbar" aria-live="polite"><strong>${left}</strong> ${left === 1 ? 'point' : 'points'} left</div>
+${nav('next-ex', 'See the result')}`;
+};
+
+function exitFields() {
+  if (state.exit === 'decide') {
+    if (!state.ex.choice) state.ex.choice = ranked()[0].o.id;
+    return `<div class="q"><span class="label">Which option do you choose?</span>
+      <fieldset class="choices"><legend class="sr">Your choice</legend>${allOpts().map(o => `<label class="choice"><input type="radio" name="choice" value="${o.id}" data-bind="ex.choice" ${state.ex.choice === o.id ? 'checked' : ''}><span>${esc(o.name)}</span></label>`).join('')}</fieldset></div>
+      ${field({ bind: 'ex.why', label: 'Which note tipped the balance, and why?', hint: 'Name the future, the card or the regret that decided it for you.' })}`;
+  }
+  if (state.exit === 'test') return `
+    ${field({ bind: 'ex.step', label: 'What is the smallest step that lets you live a piece of this future within four weeks?', hint: 'A conversation, a trial week, a prototype, a side project.' })}
+    ${field({ bind: 'ex.signal', label: 'How will you know this future feels right?', hint: 'What would you need to see, hear or feel?' })}
+    ${dateField('ex.when', 'When will you look at the result?')}`;
+  if (state.exit === 'explore') return `
+    ${field({ bind: 'ex.info', label: 'Which piece of information would change your picture of the future most?' })}
+    ${field({ bind: 'ex.who', label: 'Who already lives this future and could tell you about it?' })}
+    ${dateField('ex.stop', 'When do you stop searching and decide?')}`;
+  return '';
+}
+
+S.exit = () => {
+  const sc = ranked(), max = Math.max(1, ...sc.map(s => s.score));
+  const lead = sc[0], gap = lead.score - (sc[1] ? sc[1].score : 0), clear = gap >= 3;
+  const trail = reasonsFor(lead.o.id).filter(n => ptsOf(lead.o.id, n) > 0)
+    .map(n => { const v = ptsOf(lead.o.id, n); return `<li class="${n.type}"><span class="src">${esc(srcLabel(n))}, ${v} ${v === 1 ? 'point' : 'points'}</span>${esc(n.text)}</li>`; }).join('')
+    + (state.regretPick === lead.o.id ? '<li class="regret"><span class="src">Regret card, 3 points</span>You would most regret not choosing it.</li>' : '');
+  return `
+<h2>The result</h2>
+<ol class="rank">${sc.map(s => `<li><span class="rank-name">${esc(s.o.name)}</span><span class="bar"><span style="width:${s.score / max * 100}%"></span></span><span class="rank-score">${s.score}</span></li>`).join('')}</ol>
+<p class="small">Points on notes plus 3 for the regret card.</p>
+<h3>Why “${esc(lead.o.name)}” leads</h3>
+<ul class="trail">${trail || '<li>No points yet.</li>'}</ul>
+<h3>Did the journey show a clearly preferred future?</h3>
+<p class="lede">${clear
+    ? `“${esc(lead.o.name)}” leads by ${gap} points, so the game suggests deciding.`
+    : `The lead is ${gap} ${gap === 1 ? 'point' : 'points'}. No future clearly wins, so the game suggests testing or exploring first.`} The choice is yours.</p>
+<fieldset class="exits"><legend class="sr">Your way forward</legend>
+${EXITS.map(x => {
+    const sugg = clear ? x.id === 'decide' : x.id !== 'decide';
+    return `<label class="exit"><input type="radio" name="exit" value="${x.id}" data-bind="exit" data-rerender ${state.exit === x.id ? 'checked' : ''}><span class="exit-title">${x.title}</span><span class="exit-text">${x.text}</span>${sugg ? '<span class="tag">Suggested</span>' : ''}</label>`;
+  }).join('')}
+</fieldset>
+${exitFields()}
+${nav('next-exit', 'Open the envelope')}`;
+};
+
+function draftLetter() {
+  const we = isWe(), lead = ranked()[0].o;
+  const hello = we ? 'Dear board,' : 'Dear me,';
+  const bye = we ? 'The board, one year from now' : 'Me, one year from now';
+  if (state.exit === 'decide') {
+    const o = byId(state.ex.choice) || lead, d = state.j1[o.id] || {};
+    return `${hello}\n\nOne year ago today ${we ? 'we' : 'you'} chose “${o.name}”.\n\nWhat I am proudest of now: ${d.proud || '…'}\n\nWhat was harder than expected: ${d.regret || '…'}\n\nWhat I want you to remember while it is still early: …\n\nThank you for deciding.\n\n${bye}`;
+  }
+  if (state.exit === 'test') {
+    return `${hello}\n\nOne year ago today ${we ? 'we' : 'you'} did not force a decision. Instead ${we ? 'we' : 'you'} tested a piece of the future: ${state.ex.step || '…'}\n\nWhat the test showed: …\n\nWhat I hope ${we ? 'we' : 'you'} did next: …\n\n${bye}`;
+  }
+  return `${hello}\n\nOne year ago today ${we ? 'we' : 'you'} went looking for one thing: ${state.ex.info || '…'}\n\nWhat ${we ? 'we' : 'you'} found: …\n\nHow it changed the picture of the future: …\n\n${bye}`;
+}
+
+S.letter = () => {
+  const lead = ranked()[0].o, same = state.gut === lead.id;
+  return `
+<h2>Open the envelope</h2>
+<div class="reveal">
+  <div><p class="sub">Your sealed gut pick</p><p class="big">${esc(nameOf(state.gut))}</p></div>
+  <div><p class="sub">Your exchange result</p><p class="big">${esc(lead.name)}</p></div>
+</div>
+<p class="lede">${same ? 'The journey confirmed your first instinct.' : 'The journey moved you away from your first instinct.'}</p>
+${field({ bind: 'reflect.changed', label: same ? 'What did the journey add to your first instinct?' : 'What changed your mind? Name the note or the card.' })}
+<h3>Your letter from ${Y1}</h3>
+<div class="letter-row"><p class="hint">Drafted from your notes. Rewrite it in your own words.</p><button class="linkbtn" data-action="redraft">Redraft from my notes</button></div>
+<textarea class="letter" data-bind="letter" rows="14" aria-label="Letter from the future">${esc(state.letter)}</textarea>
+<h3>Your next move</h3>
+${field({ bind: 'plan.step', label: 'What is your next concrete step?', rows: 2 })}
+${dateField('plan.when', 'When will you take it?')}
+${field({ bind: 'plan.who', label: 'Who should know about it?', rows: 2 })}
+${dateField('plan.review', 'When will you look back at what you learned?')}
+<h3>Look back on the journey</h3>
+${field({ bind: 'reflect.horizon', label: 'How did the one-year picture differ from the five-year picture of the same option?' })}
+${field({ bind: 'reflect.card', label: 'Which event card shook an option most, and which option stayed robust?' })}
+${field({ bind: 'reflect.blind', label: 'Where might wishful thinking have crept in? Which other perspective, such as analytical or cautious, would you add?' })}
+${nav('next-letter', 'Seal the letter')}`;
+};
+
+S.summary = () => {
+  const sc = ranked(), exit = EXITS.find(x => x.id === state.exit) || {};
+  const exDetail = state.exit === 'decide'
+    ? `Chose “${nameOf(state.ex.choice)}”.${filled(state.ex.why) ? '\n' + state.ex.why : ''}`
+    : state.exit === 'test'
+      ? `${state.ex.step || ''}${filled(state.ex.signal) ? '\nSignal: ' + state.ex.signal : ''}${state.ex.when ? '\nResult on ' + state.ex.when : ''}`
+      : `${state.ex.info || ''}${filled(state.ex.who) ? '\nAsk: ' + state.ex.who : ''}${state.ex.stop ? '\nDecide by ' + state.ex.stop : ''}`;
+  const row = (dt, dd) => filled(String(dd || '')) ? `<dt>${dt}</dt><dd>${dd}</dd>` : '';
+  return `
+<h2>Your letter from the future</h2>
+<div class="final"><span class="date">${Y1_FULL}</span>${esc(state.letter)}</div>
+<dl class="brief">
+  ${row('Decision', esc(state.decision))}
+  ${row('North star', esc(state.north))}
+  <dt>Options and points</dt><dd><ul>${sc.map(s => `<li>${esc(s.o.name)}: ${s.score}</li>`).join('')}</ul></dd>
+  ${row('Gut pick', esc(nameOf(state.gut)))}
+  ${row('Way forward', esc(exit.title || ''))}
+  ${row('Details', esc(exDetail))}
+  ${row('Next step', esc(state.plan.step))}
+  ${row('When', esc(state.plan.when))}
+  ${row('Tell', esc(state.plan.who))}
+  ${row('Look back on', esc(state.plan.review))}
+  ${row('What changed', esc(state.reflect.changed))}
+  ${row('One vs five years', esc(state.reflect.horizon))}
+  ${row('Robustness', esc(state.reflect.card))}
+  ${row('Blind spots', esc(state.reflect.blind))}
+</dl>
+<div class="nav"><button class="btn ghost" data-action="back">Edit answers</button><button class="btn" data-action="reset">${confirmReset ? 'Tap again to erase everything' : 'Start a new decision'}</button></div>`;
+};
+
+/* Navigation */
+const app = document.getElementById('app');
+const topEl = document.getElementById('top');
+const horizon = document.getElementById('horizon');
+
+function header() {
+  const i = STATION[state.screen];
+  if (i == null) { topEl.hidden = true; document.body.classList.remove('has-top'); return; }
+  topEl.hidden = false; document.body.classList.add('has-top');
+  topEl.innerHTML = `<div class="bar"><span class="brand">Letters from the Future</span><span class="step">Station ${i + 1} of 8: ${STATIONS[i]}</span></div><div class="track" role="progressbar" aria-label="Progress" aria-valuemin="1" aria-valuemax="8" aria-valuenow="${i + 1}"><span style="width:${(i + 1) / 8 * 100}%"></span></div>`;
+}
+function render(keep) {
+  const y = window.scrollY;
+  horizon.dataset.phase = PHASE[state.screen];
+  header();
+  app.innerHTML = `<div class="screen">${S[state.screen]()}</div>`;
+  if (keep) window.scrollTo(0, y);
+  else {
+    window.scrollTo(0, 0);
+    const h = app.querySelector('h1, h2');
+    if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+  }
+}
+function go(screen, idx = 0) {
+  state.hist.push({ screen: state.screen, idx: state.idx });
+  state.screen = screen; state.idx = idx; state.err = ''; confirmReset = false;
+  save(); render();
+}
+function fail(msg) {
+  state.err = msg; render(true);
+  const e = app.querySelector('.err'); if (e) e.scrollIntoView({ block: 'center' });
+}
+
+const A = {
+  begin() { go('start'); },
+  resume() { state.screen = resume.screen; state.idx = resume.idx; resume = null; render(); },
+  reset() {
+    if (!confirmReset) { confirmReset = true; render(true); return; }
+    confirmReset = false; resume = null; state = fresh(); save(); render();
+  },
+  back() {
+    const h = state.hist.pop(); if (!h) return;
+    state.screen = h.screen; state.idx = h.idx; state.err = ''; confirmReset = false;
+    if (state.screen === 'intro') resume = null;
+    save(); render();
+  },
+  case(el) {
+    const k = el.dataset.case, c = CASES[k];
+    state.caseId = k; state.deckId = c.deck; state.deck = [];
+    state.decision = c.decision; state.options = c.options.map(n => ({ id: uid(), name: n }));
+    state.gut = null; state.j1 = {}; state.j5 = {}; state.points = {}; state.regretPick = null;
+    save(); render(true);
+  },
+  'next-start'() {
+    if ((state.decision || '').trim().length < 3) return fail('Describe your decision in a few words first.');
+    go('frame');
+  },
+  addopt() { state.options.push({ id: uid(), name: '' }); save(); render(true); },
+  rmopt(el) {
+    const [o] = state.options.splice(+el.dataset.i, 1);
+    if (o && state.gut === o.id) state.gut = null;
+    save(); render(true);
+  },
+  'next-frame'() {
+    const named = state.options.filter(o => filled(o.name));
+    if (named.length < 2) return fail('Name at least two options.');
+    if (!filled(state.north)) return fail('Describe your north star before you travel.');
+    if (!state.deadline && !state.noDeadline) return fail('Set a deadline or tick “No fixed deadline”.');
+    state.options = named; go('gut');
+  },
+  'next-gut'() {
+    if (!state.gut || !byId(state.gut)) return fail('Pick one option. Nobody will see it until the end.');
+    go('j1', 0);
+  },
+  draw(el) {
+    const id = el.dataset.opt, deck = DECKS[state.deckId] || DECKS.personal;
+    if (!state.deck.length) state.deck = shuffle([...deck.keys()]);
+    const i = state.deck.pop();
+    state.j1[id] = { ...(state.j1[id] || {}), card: deck[i] };
+    justDrawn = id; state.err = ''; save(); render(true); justDrawn = null;
+  },
+  'next-j1'() {
+    const o = opts()[state.idx], d = state.j1[o.id] || {};
+    if (!d.card) return fail('Draw the event card first.');
+    if (!filled(d.proud) || !filled(d.regret)) return fail('Write at least a proud note and a regret note.');
+    if (state.idx < opts().length - 1) go('j1', state.idx + 1); else go('gate5');
+  },
+  go5() { state.did5 = true; go('j5', 0); },
+  skip5() { state.did5 = false; go('work'); },
+  'next-j5'() {
+    const o = opts()[state.idx], d = state.j5[o.id] || {};
+    if (!filled(d.headline)) return fail('Write the headline first.');
+    if (!filled(d.proud) || !filled(d.regret)) return fail('Write at least a proud note and a regret note.');
+    if (state.idx < opts().length - 1) go('j5', state.idx + 1); else go('work');
+  },
+  mkhybrid() {
+    const n = (state.draft.name || '').trim();
+    if (!n) return fail('Give the new option a name first.');
+    state.options.push({ id: uid(), name: n, desc: (state.draft.desc || '').trim(), hybrid: true });
+    state.draft = {}; state.err = ''; save(); render(true);
+  },
+  rmhybrid() {
+    const h = hyb(); if (!h) return;
+    state.options = state.options.filter(o => o !== h);
+    delete state.j1[h.id];
+    if (state.regretPick === h.id) state.regretPick = null;
+    if (state.ex.choice === h.id) state.ex.choice = null;
+    save(); render(true);
+  },
+  'next-work'() {
+    const h = hyb();
+    if (h) {
+      const d = state.j1[h.id] || {};
+      if (!d.card || !filled(d.proud) || !filled(d.regret)) return fail('Finish the one-year jump for the new option, or remove it.');
+    }
+    go('exchange');
+  },
+  pt(el) {
+    const k = el.dataset.key, dlt = +el.dataset.d, v = (state.points[k] || 0) + dlt;
+    if (v < 0 || (dlt > 0 && spent() >= 10)) return;
+    if (v) state.points[k] = v; else delete state.points[k];
+    state.err = ''; save(); render(true);
+  },
+  'next-ex'() {
+    const left = 10 - spent();
+    if (left > 0) return fail(`Spend all 10 points first. ${left} left.`);
+    if (!state.regretPick || !byId(state.regretPick)) return fail('Place your regret card.');
+    go('exit');
+  },
+  'next-exit'() {
+    if (!state.exit) return fail('Choose how you want to move forward.');
+    const e = state.ex;
+    if (state.exit === 'decide' && !filled(e.why)) return fail('Say which note tipped the balance.');
+    if (state.exit === 'test' && !filled(e.step)) return fail('Name the smallest step you will test.');
+    if (state.exit === 'explore' && !filled(e.info)) return fail('Name the information you will look for.');
+    const sig = `${state.exit}:${e.choice || ''}`;
+    if (state.letterFor !== sig || !filled(state.letter)) { state.letter = draftLetter(); state.letterFor = sig; }
+    go('letter');
+  },
+  redraft() { state.letter = draftLetter(); save(); render(true); },
+  'next-letter'() {
+    if (!filled(state.letter)) return fail('Write your letter first.');
+    if (!filled(state.plan.step)) return fail('Name your next concrete step.');
+    go('summary');
+  }
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const fn = A[el.dataset.action];
+  if (fn) { e.preventDefault(); fn(el); }
+});
+function onInput(e) {
+  const t = e.target, b = t.dataset && t.dataset.bind;
+  if (!b) return;
+  let v = t.value;
+  if (t.type === 'range') v = Number(v);
+  if (t.type === 'checkbox') v = t.checked;
+  if (t.type === 'radio' && !t.checked) return;
+  set(b, v); save();
+  if (t.hasAttribute('data-live')) {
+    app.querySelectorAll('[data-out]').forEach(o => { const k = o.dataset.out; o.textContent = k === 'gate' ? gateText() : get(k); });
+  }
+}
+document.addEventListener('input', onInput);
+document.addEventListener('change', e => { onInput(e); if (e.target.hasAttribute && e.target.hasAttribute('data-rerender')) { save(); render(true); } });
+
+render();
+</script>
+</body>
+</html>
